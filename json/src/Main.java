@@ -1,41 +1,34 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
         Cat cat = new Cat(110, "murchuk", true);
-        Class clazz2 = null;
-        try {
-            clazz2 = Class.forName("Cat");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        Class clazz = null;
-        try {
-            clazz = Class.forName("java.util.List");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        List list = new ArrayList();
-        list.add("cat");
-        list.add("dog");
-        list.add(1234);
-        String s = "\"{\"age\":1000,\"name\":\"petro\",\"play\":\"true\"}\"";
-        String test = "\"\"{\"age\":110,\"name\":\"murchuk\",\"play\":\"true\"}\"\"";
-        String s2 = "{\"Petro\",\"Ivan\",32}";
-        try {
-            MethodsJson.readJson(s2,clazz);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        // MethodJson.readJson(test, clazz2);
-        MethodsJson.writeJson(list, clazz);
-        MethodsJson.writeJson(cat, clazz2);
+        Cat cat2 = new Cat(112, "aaa", false);
+        Cat cat3 = new Cat(113, "vase", true);
+
+        List<? super Object> list2 = new ArrayList<>();
+        list2.add("cat");
+        list2.add("dog");
+        list2.add(1234);
+        List<? super Object> list = new ArrayList<>();
+        list.add(cat);
+        list.add(cat2);
+        list.add(cat3);
+
+        String s = "{\"age\":110,\"name\":\"murchuk\",\"play\":true}";
+        String test = "{\"cat\",\"dog\",1234}";
+
+        Class clazzList = Class.forName("java.util.ArrayList");
+        Class clazz2 =Class.forName("Cat");
+
+
+//        MethodsJson.writeJson(cat);
+//        MethodsJson.writeJson(list2);
+        MethodsJson.readJson(s,clazz2);
+      //  MethodsJson.readJson(test,clazzList);
+
 
     }
-
 }
