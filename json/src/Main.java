@@ -4,30 +4,25 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
-        Cat cat = new Cat(110, "murchuk", true);
-        Cat cat2 = new Cat(112, "aaa", false);
-        Cat cat3 = new Cat(113, "vase", true);
 
-        List<? super Object> list2 = new ArrayList<>();
-        list2.add("cat");
-        list2.add("dog");
-        list2.add(1234);
-        List<? super Object> list = new ArrayList<>();
-        list.add(cat);
-        list.add(cat2);
-        list.add(cat3);
+        List<String> listTest = new ArrayList<>();
+        listTest.add("cat");
+        listTest.add("dog");
+        listTest.add("1234");
 
-        String s = "{\"age\":110,\"name\":\"murchuk\",\"play\":true}";
-        String test = "{\"cat\",\"dog\",1234}";
+        Cat catTest = new Cat(110, "murchuk", true);
 
-        Class clazzList = Class.forName("java.util.ArrayList");
-        Class clazz2 =Class.forName("Cat");
+        List<Cat> list = new ArrayList<>();
+        list.add(new Cat(110, "murchuk", true));
+        list.add(new Cat(111, "murchuk1", true));
 
+        MethodsJson.writeJson(listTest);
+        MethodsJson.writeJson(catTest);
+        MethodsJson.writeJson(list); //невийшов
+        // [{age=110, name='murchuk', play=true},{age=110, name='murchuk', play=true}]невийшов невийшов невийшов невийшов
 
-//        MethodsJson.writeJson(cat);
-//        MethodsJson.writeJson(list2);
-        MethodsJson.readJson(s,clazz2);
-      //  MethodsJson.readJson(test,clazzList);
+        MethodsJson.readJson("{\"age\":110,\"name\":\"murchuk\",\"play\":true}", Class.forName("Cat"));
+        MethodsJson.readJson("[\"cat\",\"dog\",\"1234\"]", Class.forName("java.util.ArrayList"));
 
 
     }

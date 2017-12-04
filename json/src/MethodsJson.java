@@ -1,29 +1,32 @@
-
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MethodsJson {
 
     public static String writeJson(Object object1) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        String stringJson = "{";
+        String stringJson = "";
         Class clazz = Class.forName(String.valueOf(object1.getClass().getName()));
         Field field[] = clazz.getDeclaredFields();
         if (clazz.getName().equals("java.util.ArrayList")) {
+            stringJson += "[";
             List<?> list = (List) object1;
-            for (Object l : list) {
-                if (checkString(l)) {
-                    stringJson += "\"" + l + "\"" + ",";
-                } else {
-                    stringJson += l;
+            String stringOfList = String.valueOf(list);
+            if (stringOfList.contains("},")) {
+                for (Object l : list) {
+                    stringJson += stringOfList.substring(stringOfList.indexOf("{"), stringOfList.indexOf("}") + 2);
+                }
+            } else {
+                for (Object objectList : list) {
+                    stringJson += "\"" + objectList + "\"" + ",";
                 }
             }
-            stringJson += "}";
+            stringJson = stringJson.substring(0, stringJson.length() - 1);
+            stringJson += "]";
             System.out.println(stringJson);
             return stringJson;
-
         } else {
+            stringJson += "{";
             for (Field f : field) {
                 f.setAccessible(true);
                 clazz.getDeclaredField(f.getName());
@@ -48,56 +51,28 @@ public class MethodsJson {
 
         if (clazz.getName().equals("java.util.ArrayList")) {
             List<String> list = new ArrayList();
-            for (int i = 0; i < string.length(); i++) {
-                string = string.substring(1);
-                string = string.replaceAll("\"", "");
-                if (!string.contains(",")) {
-                    list.add(string.substring(string.indexOf(""), string.indexOf("}")));
-                    string = "";
-                } else {
-                    list.add(string.substring(string.indexOf(":") + 1, string.indexOf(",")));
-                    string = string.substring(string.indexOf(","));
+            string = string.substring(1);
+            string = string.replaceAll("\"", "");
+            string = string.replaceAll("]", ",");
+            System.out.println(string);
+
+            Field field[] = clazz.getDeclaredFields();
+            for (Field f : field) {
+                if (string.contains(",")) {
+                    list.add(string.substring(string.indexOf(""), string.indexOf(",")));
+                    string = string.substring(string.indexOf(",") + 1);
                 }
             }
-            for (Object l : list) {
-                System.out.print(l + " ");
-            }
-
             return list;
         } else {
-//            Object objec = clazz.newInstance();
-//            Class cl = Class.forName(String.valueOf(objec.getClass().getName()));
-//            Field field[] = cl.getDeclaredFields();
-//            string = string.replaceAll("\"", "");
-//            string = string.substring(1);
-//            string = string.substring(0, string.length() - 1);
-//            System.out.println(string);
-//            for (Field f : field) {
-//                f.setAccessible(true);
-//
-//                if (checkString(string.substring(string.indexOf(":") + 1, string.indexOf(",")))) {
-//                    f.setInt(objec, Integer.parseInt(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
-//                    string = string.substring(string.indexOf(",") + 1);
-//
-//                }
-//                    f.set(objec, String.valueOf(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
-//                    string = string.substring(string.indexOf(",") + 1);
-//
-//
-//                System.out.println(objec);
-//            }
-//            System.out.println(objec);
-//            return objec;
-            for (int i = 0; i < string.length(); i++) {
-                string = string.replaceAll("\"", "");
-            }
+            string = string.replaceAll("\"", "");
             string = string.substring(1);
+            string = string.substring(0, string.length() - 1);
             Object objec = clazz.newInstance();
-            Class cl = Class.forName(String.valueOf(objec.getClass().getName()));
-            Field field[] = cl.getDeclaredFields();
+            Field field[] = clazz.getDeclaredFields();
             for (Field f : field) {
                 f.setAccessible(true);
-                if (!string.contains(",")) {
+                if (!string.contains(":")) {
                     string = "";
                     f.setAccessible(false);
                 } else {
@@ -105,29 +80,40 @@ public class MethodsJson {
                         f.set(objec, Integer.parseInt(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                         string = string.substring(string.indexOf(",") + 1);
                     } else if (checkString(string.substring(string.indexOf(":") + 1, string.indexOf(",")))) {
-                        f.set(objec, string.substring(string.indexOf(":") + 1, string.indexOf(",")));
-                        string = string.substring(string.indexOf(",") + 1);
-                    }else{
-                        String t = string.substring(string.indexOf(":") + 1, string.indexOf("}"));
-                        System.out.println(t);
+
+                        if (isBoolean(string.substring(string.indexOf(":") + 1, string.indexOf(",")))) {
+                            Boolean b = Boolean.valueOf(string.substring(string.indexOf(":") + 1, string.indexOf(",")));
+                            f.set(objec, b);
+                        } else {
+                            f.set(objec, string.substring(string.indexOf(":") + 1, string.indexOf(",")));
+                            string = string.substring(string.indexOf(",") + 1);
+                            if (!string.contains(",")) {
+                                string = string.substring(string.indexOf(":"), string.length()) + ",";
+                            }
+                        }
                     }
                 }
+
             }
             System.out.println(objec);
-            return objec.toString();
+            return objec;
         }
-
     }
 
     private static boolean checkString(Object obj) {
-        if (obj instanceof Number || obj.getClass().isPrimitive()) {
-            return false;
-        }
         try {
             Integer.parseInt(String.valueOf(obj));
-
         } catch (Exception e) {
             return true;
+        }
+        return false;
+    }
+
+    public static boolean isBoolean(String str) {
+        try {
+            boolean d = Boolean.parseBoolean(str);
+            return d;
+        } catch (NumberFormatException nfe) {
         }
         return false;
     }
