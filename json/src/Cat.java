@@ -1,7 +1,7 @@
-
 public class Cat {
     private int age;
     private String name;
+
     private boolean play;
 
     public Cat(int age, String name, boolean play) {

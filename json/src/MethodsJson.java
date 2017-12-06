@@ -9,25 +9,70 @@ public class MethodsJson {
         Class clazz = Class.forName(String.valueOf(object1.getClass().getName()));
         Field field[] = clazz.getDeclaredFields();
         if (clazz.getName().equals("java.util.ArrayList")) {
-            stringJson += "[";
             List<?> list = (List) object1;
-            String stringOfList = String.valueOf(list);
-            if (stringOfList.contains("},")) {
-                for (Object l : list) {
-                    stringJson += stringOfList.substring(stringOfList.indexOf("{"), stringOfList.indexOf("}") + 2);
+
+            if (list.size() == 0) {
+                stringJson += "[";
+                stringJson += "{}]";
+                System.out.println(stringJson);
+                return stringJson;
+            } else if (list.size() == 1 || !list.contains("}")) {
+                stringJson += "[";
+                String stringOfList = String.valueOf(list);
+                if (stringOfList.contains("},")) {
+                    for (Object l : list) {
+                        stringJson += stringOfList.substring(stringOfList.indexOf("{"), stringOfList.indexOf("}") + 2);
+                    }
+                } else {
+                    for (Object objectList : list) {
+                        stringJson += "\"" + objectList + "\"" + ",";
+                    }
                 }
+                stringJson = stringJson.substring(0, stringJson.length() - 1);
+                stringJson += "]";
+                System.out.println(stringJson);
+                return stringJson;
+
             } else {
-                for (Object objectList : list) {
-                    stringJson += "\"" + objectList + "\"" + ",";
+                String per = String.valueOf(list);
+                Object var = "";
+                stringJson += "[";
+                for (Object o : list) {
+                    if (per.contains("},")) {
+                        var = per.substring(per.indexOf("{") + 1, per.indexOf("},"));
+                        per = per.substring(per.indexOf("},") + 1, per.length());
+                    } else {
+                        var = per.substring(per.indexOf("{") + 1, per.indexOf("}"));
+                    }
+                    Class cla = Class.forName(String.valueOf(o.getClass().getName()));
+                    Field fieldO[] = cla.getDeclaredFields();
+                    stringJson += "{";
+                    for (Field f : fieldO) {
+                        f.setAccessible(true);
+
+                        if (checkString(f.get(o))) {
+                            if (f.get(o) instanceof Boolean) {
+                                stringJson += "\"" + f.getName() + "\"" + ":" + f.get(o) + ",";
+                            } else {
+                                stringJson += "\"" + f.getName() + "\"" + ":" + "\"" + f.get(o) + "\"" + ",";
+                            }
+                        } else {
+                            stringJson += "\"" + f.getName() + "\"" + ":" + f.get(o) + ",";
+                        }
+                    }
+
+                    stringJson = stringJson.substring(0, stringJson.length() - 1);
+                    stringJson += "},";
                 }
+                stringJson = stringJson.substring(0, stringJson.length() - 1);
+
+                stringJson += "]";
+
             }
-            stringJson = stringJson.substring(0, stringJson.length() - 1);
-            stringJson += "]";
-            System.out.println(stringJson);
-            return stringJson;
         } else {
             stringJson += "{";
             for (Field f : field) {
+
                 f.setAccessible(true);
                 clazz.getDeclaredField(f.getName());
                 if (checkString(f.get(object1))) {
