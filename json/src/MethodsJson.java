@@ -10,13 +10,12 @@ public class MethodsJson {
         Field field[] = clazz.getDeclaredFields();
         if (clazz.getName().equals("java.util.ArrayList")) {
             List<?> list = (List) object1;
-
+            String s = list.toString();
             if (list.size() == 0) {
                 stringJson += "[";
                 stringJson += "{}]";
-                System.out.println(stringJson);
                 return stringJson;
-            } else if (list.size() == 1 || !list.contains("}")) {
+            } else if (!s.contains("}")) {
                 stringJson += "[";
                 String stringOfList = String.valueOf(list);
                 if (stringOfList.contains("},")) {
@@ -30,10 +29,9 @@ public class MethodsJson {
                 }
                 stringJson = stringJson.substring(0, stringJson.length() - 1);
                 stringJson += "]";
-                System.out.println(stringJson);
                 return stringJson;
 
-            } else {
+            }  else  {
                 String per = String.valueOf(list);
                 Object var = "";
                 stringJson += "[";
@@ -65,9 +63,7 @@ public class MethodsJson {
                     stringJson += "},";
                 }
                 stringJson = stringJson.substring(0, stringJson.length() - 1);
-
                 stringJson += "]";
-
             }
         } else {
             stringJson += "{";
@@ -88,7 +84,6 @@ public class MethodsJson {
             stringJson = stringJson.substring(0, stringJson.length() - 1);
             stringJson += "}";
         }
-        System.out.println(stringJson);
         return stringJson;
     }
 
@@ -99,8 +94,6 @@ public class MethodsJson {
             string = string.substring(1);
             string = string.replaceAll("\"", "");
             string = string.replaceAll("]", ",");
-            System.out.println(string);
-
             Field field[] = clazz.getDeclaredFields();
             for (Field f : field) {
                 if (string.contains(",")) {
@@ -140,7 +133,6 @@ public class MethodsJson {
                 }
 
             }
-            System.out.println(objec);
             return objec;
         }
     }
