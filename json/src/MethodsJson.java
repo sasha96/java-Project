@@ -6,6 +6,7 @@ public class MethodsJson {
 
     public static String writeJson(Object object1) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         String stringJson = "";
+        System.out.println(object1);
         Class clazz = Class.forName(String.valueOf(object1.getClass().getName()));
         Field field[] = clazz.getDeclaredFields();
         if (clazz.getName().equals("java.util.ArrayList")) {

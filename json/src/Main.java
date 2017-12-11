@@ -16,9 +16,9 @@ public class Main {
         list.add(new Cat(1113, "vasa1", true));
         list.add(new Cat(1113, "vasa1", true));
         List e = new ArrayList();
-        MethodsJson.writeJson(listTest);
-        MethodsJson.writeJson(list);
-        MethodsJson.writeJson(catTest);
+//        MethodsJson.writeJson(listTest);
+    MethodsJson.writeJson(list);
+    //    MethodsJson.writeJson(catTest);
 
     }
 }
