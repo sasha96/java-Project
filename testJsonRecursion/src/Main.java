@@ -17,8 +17,8 @@ public class Main {
         Cat catTest = new Cat(110, "murchuk", (ArrayList) listTest, true);
         catTest.setA((ArrayList) list);
 
-        System.out.println(Test.who(listTest));
-        System.out.println(Test.who(catTest));
-        System.out.println(Test.who(list));
+        System.out.println(Test.writeJson(listTest));
+        System.out.println(Test.writeJson(catTest));
+        System.out.println(Test.writeJson(list));
     }
 }

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Test {
-    public static String who(Object o)  {
+    public static String writeJson(Object o)  {
         Class clazz = null;
         try {
             clazz = Class.forName(String.valueOf(o.getClass().getName()));
