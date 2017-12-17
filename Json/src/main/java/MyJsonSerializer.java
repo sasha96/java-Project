@@ -56,7 +56,7 @@ public class MyJsonSerializer implements JsonSerializer {
 
     @Override
     public Object read(String string, Class clazz, String type) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        if (clazz.getName().contains("java.util")) {
+        if (clazz.getTypeName().contains("List")) {
             return readList(string, clazz, type);
         } else {
             return readObject(string, clazz, type);
@@ -76,10 +76,10 @@ public class MyJsonSerializer implements JsonSerializer {
                 f.setAccessible(false);
             } else {
                 f.setAccessible(true);
-                if (!checkString(string.substring(string.indexOf(":") + 1, string.indexOf(",")))) {
+                if (f.getType()==Integer.TYPE) {
                     f.set(objec, Integer.parseInt(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                     string = string.substring(string.indexOf(",") + 1);
-                } else if (isBoolean(string.substring(string.indexOf(":") + 1, string.indexOf(",")))) {
+                } else if (f.getType()==Boolean.TYPE) {
                     f.set(objec, Boolean.parseBoolean(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                     string = string.substring(string.indexOf(",") + 1);
                 } else if (f.getType() != Integer.TYPE && f.getType() != Boolean.TYPE && f.getType() != String.class && f.getType() != List.class) {
@@ -143,22 +143,5 @@ public class MyJsonSerializer implements JsonSerializer {
         return list;
     }
 
-    private static boolean checkString(Object obj) {
-        try {
-            Integer.parseInt(String.valueOf(obj));
-        } catch (Exception e) {
-            return true;
-        }
-        return false;
-    }
-
-    private static boolean isBoolean(String str) {
-        try {
-            boolean d = Boolean.parseBoolean(str);
-            return d;
-        } catch (NumberFormatException nfe) {
-        }
-        return false;
-    }
 }
 

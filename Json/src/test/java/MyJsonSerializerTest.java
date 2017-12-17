@@ -65,8 +65,7 @@ public class MyJsonSerializerTest {
     @Test
     public void testReadCat() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 
-
-        ArrayList list = new ArrayList();
+        List<String> list = new ArrayList<>();
         list.add("cat");
         list.add("dog");
         Dog dog = new Dog();
@@ -89,7 +88,7 @@ public class MyJsonSerializerTest {
         list.add("desc");
         list.add("pen");
         String expectedResult = "[\"window\",\"desc\",\"pen\"]";
-        ArrayList actualResult = (ArrayList) serializer.read(expectedResult, list.getClass(), null);
+        List actualResult = (List) serializer.read(expectedResult, list.getClass(), null);
         assertEquals(list, actualResult);
     }
 
