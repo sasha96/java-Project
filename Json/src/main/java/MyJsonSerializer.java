@@ -55,15 +55,15 @@ public class MyJsonSerializer implements JsonSerializer {
     }
 
     @Override
-    public Object read(String string, Class clazz, String type) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public Object read(String string, Class clazz) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         if (clazz.getTypeName().contains("List")) {
-            return readList(string, clazz, type);
+            return readList(string, clazz);
         } else {
-            return readObject(string, clazz, type);
+            return readObject(string, clazz);
         }
     }
 
-    private Object readObject(String string, Class clazz, String type) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    private Object readObject(String string, Class clazz) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         string = string.replaceAll("\"", "");
         string = string.replaceAll("]", ",");
         string = string.substring(1);
@@ -76,20 +76,20 @@ public class MyJsonSerializer implements JsonSerializer {
                 f.setAccessible(false);
             } else {
                 f.setAccessible(true);
-                if (f.getType()==Integer.TYPE) {
+                if (f.getType() == Integer.TYPE) {
                     f.set(objec, Integer.parseInt(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                     string = string.substring(string.indexOf(",") + 1);
-                } else if (f.getType()==Boolean.TYPE) {
+                } else if (f.getType() == Boolean.TYPE) {
                     f.set(objec, Boolean.parseBoolean(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                     string = string.substring(string.indexOf(",") + 1);
-                } else if (f.getType() != Integer.TYPE && f.getType() != Boolean.TYPE && f.getType() != String.class && f.getType() != List.class) {
+                } else if (f.getType() != String.class && f.getType() != List.class) {
                     String s = string.substring(string.indexOf("{"), string.indexOf("}") + 1);
-                    f.set(objec, read(s, Class.forName(String.valueOf(f.getType().getName())), ""));
+                    f.set(objec, read(s, Class.forName(String.valueOf(f.getType().getName()))));
                 } else if (f.getType() == List.class) {
                     String s = string.substring(string.indexOf("[") + 1);
                     s = s.substring(0, s.length() - 1);
                     s += "";
-                    f.set(objec, read(s, Class.forName("java.util.ArrayList"), type));
+                    f.set(objec, read(s, f.getType()));
                 } else {
                     f.set(objec, (string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                     string = string.substring(string.indexOf(",") + 1);
@@ -99,47 +99,27 @@ public class MyJsonSerializer implements JsonSerializer {
         return objec;
     }
 
-    private List<String> readList(String string, Class clazz, String type) {
+    private List<String> readList(String string, Class clazz) {
         string = string.replace("]", "");
-        List list = new ArrayList();
-        if (type != "") {
-            int o = 0;
-            char[] chars = string.toCharArray();
-            for (int i = 0; i < chars.length; i++) {
-                if (chars[i] == ',')
-                    o++;
-            }
-            for (int r = 0; r <= o; r++) {
-                string = string.replace("{", "");
-                if (string.contains(",")) {
-
-                    list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",") - 1));
-                    string = string.substring(string.indexOf(",") + 1);
-                } else {
-
-                    list.add(string.substring(string.indexOf(",") + 2, string.length() - 1));
-                    return list;
-                }
-            }
-        } else {
-            int o = 0;
-            char[] chars = string.toCharArray();
-            for (int i = 0; i < chars.length; i++) {
-                if (chars[i] == ',')
-                    o++;
-            }
-            for (int r = 0; r <= o; r++) {
-                string = string.replace("{", "");
-                if (string.contains(",")) {
-                    list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")));
-                    string = string.substring(string.indexOf(",") + 1);
-                } else {
-                    list.add(string.substring(string.indexOf(",") + 1, string.length()));
-                    return list;
-                }
+        string = string.replace("[", "");
+        string = string.replace("\"", "");
+        List<String> list = new ArrayList<>();
+        int o = 0;
+        char[] chars = string.toCharArray();
+        for (char aChar : chars) {
+            if (aChar == ',')
+                o++;
+        }
+        for (int r = 0; r <= o; r++) {
+            string = string.replace("{", "");
+            if (string.contains(",")) {
+                list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")));
+                string = string.substring(string.indexOf(",") + 1);
+            } else {
+                list.add(string.substring(string.indexOf(",") + 1, string.length()));
+                return list;
             }
         }
-
         return list;
     }
 

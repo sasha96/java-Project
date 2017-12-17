@@ -77,7 +77,7 @@ public class MyJsonSerializerTest {
         cat.setHungry(true);
         cat.setEnemy(dog);
         String expectedResult = "{\"name\":\"vasa\",\"age\":10,\"isHungry\":true,\"enemy\":{\"nameD\":\"pety\",\"enemies\":[{\"cat\",\"dog\"}]}}\"";
-        Object actualResult = serializer.read(expectedResult, Class.forName("Cat"), "Dog");
+        Object actualResult = serializer.read(expectedResult, Class.forName("Cat"));
         assertEquals(cat, actualResult);
     }
 
@@ -88,7 +88,7 @@ public class MyJsonSerializerTest {
         list.add("desc");
         list.add("pen");
         String expectedResult = "[\"window\",\"desc\",\"pen\"]";
-        List actualResult = (List) serializer.read(expectedResult, list.getClass(), null);
+        List actualResult = (List) serializer.read(expectedResult, list.getClass());
         assertEquals(list, actualResult);
     }
 
