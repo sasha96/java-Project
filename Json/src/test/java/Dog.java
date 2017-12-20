@@ -3,15 +3,9 @@ import java.util.Objects;
 
 public class Dog {
     private String nameD;
-    private List<String> enemies;
+    private List<Cat> enemies;
 
     public Dog() {
-    }
-
-    public Dog(String nameD, List<String> enemies) {
-
-        this.nameD = nameD;
-        this.enemies = enemies;
     }
 
     @Override
@@ -25,7 +19,13 @@ public class Dog {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+
+        return Objects.hash(getNameD(), getEnemies());
+    }
+
+    public Dog(String nameD, List<Cat> enemies) {
+        this.nameD = nameD;
+        this.enemies = enemies;
     }
 
     @Override
@@ -54,11 +54,11 @@ public class Dog {
         this.nameD = name;
     }
 
-    public List<String> getEnemies() {
+    public List<Cat> getEnemies() {
         return enemies;
     }
 
-    public void setEnemies(List<String> enemies) {
+    public void setEnemies(List<Cat> enemies) {
         this.enemies = enemies;
     }
 }

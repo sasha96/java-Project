@@ -1,4 +1,5 @@
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 public class MyJsonSerializer implements JsonSerializer {
@@ -12,7 +13,7 @@ public class MyJsonSerializer implements JsonSerializer {
         }
     }
 
-    String writeList(Object obj) throws IllegalAccessException {
+    private String writeList(Object obj) throws IllegalAccessException {
         List list = (List) obj;
         String result = "[";
         for (Object listItem : list) {
@@ -24,7 +25,7 @@ public class MyJsonSerializer implements JsonSerializer {
         return result + "]";
     }
 
-    String writeObj(Object obj) throws IllegalAccessException {
+    private String writeObj(Object obj) throws IllegalAccessException {
         if (obj == null) {
             return null;
         }
@@ -55,7 +56,8 @@ public class MyJsonSerializer implements JsonSerializer {
     }
 
     @Override
-    public Object read(String string, Class clazz) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public Object read(String string, Class clazz) throws Exception {
+
         if (clazz.getTypeName().contains("List")) {
             return readList(string, clazz);
         } else {
@@ -63,11 +65,18 @@ public class MyJsonSerializer implements JsonSerializer {
         }
     }
 
-    private Object readObject(String string, Class clazz) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    private Object readObject(String string, Class clazz) throws Exception {
         string = string.replaceAll("\"", "");
-        string = string.replaceAll("]", ",");
-        string = string.substring(1);
-        string = string.substring(0, string.length() - 1);
+        int countNull = 0;
+        char ch[] = string.toCharArray();
+        for (int i = 0; i < ch.length; i++) {
+            if (ch[i] == ':') {
+                countNull++;
+            }
+        }
+        if (countNull == 1) {
+            return null;
+        }
         Object objec = clazz.newInstance();
         Field field[] = clazz.getDeclaredFields();
         string += ",";
@@ -83,13 +92,27 @@ public class MyJsonSerializer implements JsonSerializer {
                     f.set(objec, Boolean.parseBoolean(string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                     string = string.substring(string.indexOf(",") + 1);
                 } else if (f.getType() != String.class && f.getType() != List.class) {
-                    String s = string.substring(string.indexOf("{"), string.indexOf("}") + 1);
+                    String s = string.substring(0, string.indexOf("}") + 1);
                     f.set(objec, read(s, Class.forName(String.valueOf(f.getType().getName()))));
                 } else if (f.getType() == List.class) {
-                    String s = string.substring(string.indexOf("[") + 1);
-                    s = s.substring(0, s.length() - 1);
-                    s += "";
-                    f.set(objec, read(s, f.getType()));
+                    String s = string.substring(string.indexOf("["), string.indexOf("]") + 1);
+                    char[] chars = s.toCharArray();
+                    int counter = 0;
+                    for (int i = 0; i < chars.length; i++) {
+                        if (chars[i] == '[') {
+                            counter++;
+                        } else if (chars[i] == '{') {
+                            counter++;
+                        } else if (chars[i] == ']') {
+                            counter--;
+                        } else if (chars[i] == '}') {
+                            counter--;
+                        }
+                        if (counter == 0) {
+                            s = string.substring(string.indexOf('['), string.indexOf(chars[i]) + 1);
+                            f.set(objec, readList(s, (Class<?>) (((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0])));
+                        }
+                    }
                 } else {
                     f.set(objec, (string.substring(string.indexOf(":") + 1, string.indexOf(","))));
                     string = string.substring(string.indexOf(",") + 1);
@@ -99,29 +122,57 @@ public class MyJsonSerializer implements JsonSerializer {
         return objec;
     }
 
-    private List<String> readList(String string, Class clazz) {
-        string = string.replace("]", "");
-        string = string.replace("[", "");
-        string = string.replace("\"", "");
-        List<String> list = new ArrayList<>();
-        int o = 0;
-        char[] chars = string.toCharArray();
-        for (char aChar : chars) {
-            if (aChar == ',')
-                o++;
-        }
-        for (int r = 0; r <= o; r++) {
-            string = string.replace("{", "");
-            if (string.contains(",")) {
-                list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")));
-                string = string.substring(string.indexOf(",") + 1);
-            } else {
-                list.add(string.substring(string.indexOf(",") + 1, string.length()));
-                return list;
+    private List<String> readList(String string, Class clazz) throws Exception {
+        if (string.contains("{")) {
+            List list = new ArrayList();
+            int o = 0;
+            int counter = 0;
+            char[] chars = string.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                if (chars[i] == '{') {
+                    counter++;
+                } else if (chars[i] == '}') {
+                    counter--;
+                    if (counter == 0) {
+                        if (chars[i + 1] == ',') {
+                            o++;
+                            break;
+                        }
+                    }
+                }
             }
-        }
-        return list;
-    }
+            for (int r = 0; r <= o; r++) {
+                if (string.contains("},")) {
+                    System.out.println(string);
+                    list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")));
+                    string = string.substring(string.indexOf(",") + 1);
+                } else {
+                    list.add(read(string, clazz));
 
+                    return list;
+                }
+            }
+            return list;
+        } else {
+            List<String> list = new ArrayList<>();
+            int o = 0;
+            char[] chars = string.toCharArray();
+            for (char aChar : chars) {
+                if (aChar == ',')
+                    o++;
+            }
+            for (int r = 0; r <= o; r++) {
+                string = string.replace("{", "");
+                if (string.contains(",")) {
+                    list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")-1));
+                    string = string.substring(string.indexOf(",") + 1);
+                } else {
+                    list.add(string.substring(string.indexOf(",") + 2, string.length()-2));
+                    return list;
+                }
+            }
+            return list;
+        }
+    }
 }
 
