@@ -57,12 +57,15 @@ public class MyJsonSerializer implements JsonSerializer {
 
     @Override
     public Object read(String string, Class clazz) throws Exception {
-
         if (clazz.getTypeName().contains("List")) {
             return readList(string, clazz);
         } else {
             return readObject(string, clazz);
         }
+    }
+    @Override
+    public Object read(String string, String stringObject) throws Exception {
+            return readList(string, stringObject);
     }
 
     private Object readObject(String string, Class clazz) throws Exception {
@@ -122,57 +125,77 @@ public class MyJsonSerializer implements JsonSerializer {
         return objec;
     }
 
-    private List<String> readList(String string, Class clazz) throws Exception {
-        if (string.contains("{")) {
-            List list = new ArrayList();
-            int o = 0;
-            int counter = 0;
-            char[] chars = string.toCharArray();
-            for (int i = 0; i < chars.length; i++) {
-                if (chars[i] == '{') {
-                    counter++;
-                } else if (chars[i] == '}') {
-                    counter--;
-                    if (counter == 0) {
-                        if (chars[i + 1] == ',') {
-                            o++;
-                            break;
-                        }
+    private List<String> readList(String string, String stringObject) throws Exception {
+        List list = new ArrayList();
+        char[] chars2 = string.toCharArray();
+        int counter2 = 0;
+        for (int i = 0; i <= chars2.length; i++) {
+            string = string.replace("[", "");
+            if (string.contains("{")) {
+                if (chars2[i] == '{') {
+                    counter2++;
+                } else if (chars2[i] == '}') {
+                    counter2--;
+                }
+                if (counter2 == 0) {
+                    String w = string.substring(string.indexOf('{') + 1, string.indexOf('}'));
+                    string = string.substring(string.indexOf("}") + 1);
+                    list.add(read(w,Class.forName(stringObject)));
+                }
+            }
+        }
+        return list;
+}
+private List<String> readList(String string, Class clazz) throws Exception {
+    if (string.contains("{")) {
+        List list = new ArrayList();
+        int o = 0;
+        int counter = 0;
+        char[] chars = string.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '{') {
+                counter++;
+            } else if (chars[i] == '}') {
+                counter--;
+                if (counter == 0) {
+                    if (chars[i + 1] == ',') {
+                        o++;
+                        break;
                     }
                 }
             }
-            for (int r = 0; r <= o; r++) {
-                if (string.contains("},")) {
-                    System.out.println(string);
-                    list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")));
-                    string = string.substring(string.indexOf(",") + 1);
-                } else {
-                    list.add(read(string, clazz));
-
-                    return list;
-                }
-            }
-            return list;
-        } else {
-            List<String> list = new ArrayList<>();
-            int o = 0;
-            char[] chars = string.toCharArray();
-            for (char aChar : chars) {
-                if (aChar == ',')
-                    o++;
-            }
-            for (int r = 0; r <= o; r++) {
-                string = string.replace("{", "");
-                if (string.contains(",")) {
-                    list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")-1));
-                    string = string.substring(string.indexOf(",") + 1);
-                } else {
-                    list.add(string.substring(string.indexOf(",") + 2, string.length()-2));
-                    return list;
-                }
-            }
-            return list;
         }
+        for (int r = 0; r <= o; r++) {
+            if (string.contains("},")) {
+                System.out.println(string);
+                list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")));
+                string = string.substring(string.indexOf(",") + 1);
+            } else {
+                list.add(read(string, clazz));
+
+                return list;
+            }
+        }
+        return list;
+    } else {
+        List<String> list = new ArrayList<>();
+        int o = 0;
+        char[] chars = string.toCharArray();
+        for (char aChar : chars) {
+            if (aChar == ',')
+                o++;
+        }
+        for (int r = 0; r <= o; r++) {
+            string = string.replace("{", "");
+            if (string.contains(",")) {
+                list.add(string.substring(string.indexOf("\"") + 1, string.indexOf(",")-1));
+                string = string.substring(string.indexOf(",") + 1);
+            } else {
+                list.add(string.substring(string.indexOf(",") + 2, string.length()-2));
+                return list;
+            }
+        }
+        return list;
     }
 }
-
+}

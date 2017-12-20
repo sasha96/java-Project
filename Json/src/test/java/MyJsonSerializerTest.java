@@ -64,7 +64,7 @@ public class MyJsonSerializerTest {
 
     @Test
     public void testReadCat() throws Exception {
-        String json =  "{\"nameD\":\"pety\",\"enemies\":[{\"name\":\"Cat1\",\"age\":5,\"isHungry\":false,\"enemy\":null}]";
+        String json = "{\"nameD\":\"pety\",\"enemies\":[{\"name\":\"Cat1\",\"age\":5,\"isHungry\":false,\"enemy\":null}]";
 
         List<Cat> list = new ArrayList<>();
         Cat cat1 = new Cat();
@@ -86,7 +86,7 @@ public class MyJsonSerializerTest {
         list.add("desc");
         list.add("pen");
         String expectedResult = "[\"window\",\"desc\",\"pen\"]";
-        Object actualResult =  serializer.read(expectedResult, list.getClass());
+        Object actualResult = serializer.read(expectedResult, list.getClass());
         assertEquals(list, actualResult);
     }
 
@@ -98,6 +98,23 @@ public class MyJsonSerializerTest {
         String expectedResult = "{\"age\":10,\"name\":\"mouse\"}";
         String actualResult = serializer.write(mouse);
         assertEquals(expectedResult, actualResult);
+    }
+
+    @Test
+    public void testReadMouseList() throws Exception {
+        List<Mouse> list = new ArrayList<>();
+        Mouse mouse = new Mouse();
+        mouse.setAge(10);
+        mouse.setName("mouse");
+        Mouse mouse2 = new Mouse();
+        mouse2.setAge(9);
+        mouse2.setName("micky");
+        String json = "[{\"age\":10,\"name\":\"mouse\"},{\"age\":9,\"name\":\"micky\"}]";
+        list.add(mouse);
+        list.add(mouse2);
+
+        Object actualResult =  serializer.read(json, "Mouse");
+        assertEquals(list, actualResult);
     }
 
 }
